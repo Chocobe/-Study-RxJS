@@ -1,0 +1,22 @@
+{
+  "name": "study-rxjs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chocobe/-Study-RxJS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chocobe/-Study-RxJS/issues"
+  },
+  "homepage": "https://github.com/Chocobe/-Study-RxJS#readme",
+  "dependencies": {
+    "rxjs": "^7.3.0"
+  }
+}
