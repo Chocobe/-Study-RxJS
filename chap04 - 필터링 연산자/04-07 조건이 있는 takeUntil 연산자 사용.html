@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Document</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.3.1/rxjs.umd.min.js"></script>
+  </head>
+  
+  <body>
+    <div id="displayArea">
+      0secs
+    </div>
+
+    <button id="stopBtn">Stop</button>
+
+    <script>
+      const { interval, fromEvent } = rxjs;
+      const { take, takeUntil } = rxjs.operators;
+
+      interval(1000).pipe(
+        take(100),
+        takeUntil(
+          fromEvent(document.querySelector("#stopBtn"), "click")
+        ),
+      ).subscribe({
+        next: value => document.querySelector("#displayArea").innerHTML = `${value}secs`,
+        complete: () => console.log("완료"),
+      });
+    </script>
+  </body>
+</html>
