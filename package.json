@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Chocobe/-Study-RxJS#readme",
   "dependencies": {
+    "axios": "^0.22.0",
     "rxjs": "^7.3.0"
   }
 }
