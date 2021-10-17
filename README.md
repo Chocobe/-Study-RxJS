@@ -3,7 +3,7 @@
 
 # 목록
 
-* [01. Observable](#01)
+* [01. RxJS Basic](#01)
 
 
 
@@ -12,13 +12,11 @@
 
 
 ##### 01
-# 01. Observable
+# 01. RxJS Basic
 
 ## 01-01. ``of`` 생성기
 
 ``of`` 는 인자로 넘겨준 값을 그대로 발행하는 Observable 입니다.
-
-> [예제](02%20-%20얄코%20RxJS%20(인프런)/01%20-%20반응형%20프로그래밍과%20ReactiveX/01-01%20of%20생성기.js)
 
 ```javascript
 const { of } = require("rxjs");
