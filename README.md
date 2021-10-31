@@ -7,6 +7,8 @@
 
 * [02. 변환(transformation) 연산자](#02)
 
+* [03. ``take`` 와 ``skip`` 관련 연산자](#03)
+
 
 
 <br/><hr/><br/>
@@ -384,7 +386,7 @@ obs$.pipe(
 
 
 
-## 04. ``takeUntil`` 연산자
+## 03-04. ``takeUntil`` 연산자
 
 인자로 옵저버블을 넘겨주며, 넘겨준 옵저버블에서 값이 발행될때 까지만 값을 발행 합니다.
 
@@ -416,4 +418,108 @@ obs$.pipe(
 
 
 
-## 05. ``skip`` 연산자
+## 03-05. ``skip`` 연산자
+
+옵저버블에서 발행된 값을 특정 개수만큼 건너뜁니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { skip } = require("rxjs/operators");
+
+const obs$ = interval(500);
+obs$.pipe(
+  skip(5),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 03-06 ``skipLast`` 연산자
+
+발행된 값 중, 인저로 넘겨준 개수만큼 마지막 값을 건너뜁니다.
+
+만약, ``interval`` 과 같이, ``complete()`` 없이 값이 계속 발행되는 경우에는, 지정한 개수만큼 값이 밀려서 발행되는 동작을 합니다.
+
+(지정한 개수만큼 값이 밀려서 발행되므로, 의도한 동작을 만들기 어렵기 때문에, ``complete()`` 가 호출되는 옵저버블에 사용하는 것이 좋아 보입니다.)
+
+```javascript
+const { interval } = require("rxjs");
+const { skipLast } = require("rxjs/operators");
+
+const obs$ = interval(500);
+obs$.pipe(
+  skipLast(5),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 03-07. ``skipWhile`` 연산자
+
+callback의 조건식을 만족할 때까지, 옵저버블에서 발행된 값을 건너뜁니다.
+
+조건이 false가 되면, 그 이후로는 조건값이 바뀌어도 반영되지 않는 특징이 있습니다. (``filter`` 와 차이점)
+
+```javascript
+const { interval } = require("rxjs");
+const { skipWhile, map } = require("rxjs/operators");
+
+const obs$ = interval(500);
+obs$.pipe(
+  map(value => value % 10),
+  skipWhile(value => value < 5),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 03-08 ``skipUntil`` 연산자
+
+인자로 넘겨준 옵저버블에서 값이 발행될 때까지, 원래의 옵저버블의 발행 값을 건너뜁니다.
+
+```javascript
+const { interval, timer } = require("rxjs");
+const { skipUntil } = require("rxjs/operators");
+
+const skipTimer$ = timer(2000);
+const obs$ = interval(500);
+
+obs$.pipe(
+  skipUntil(skipTimer),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
