@@ -3,7 +3,9 @@
 
 # 목록
 
-* [01. RxJS Basic](#01)
+* [01. 기본 연산자](#01)
+
+* [02. 변환(transformation) 연산자](#02)
 
 
 
@@ -12,7 +14,7 @@
 
 
 ##### 01
-# 01. RxJS Basic
+# 01. 기본 연산자
 
 ## 01-01. ``of`` 생성기
 
@@ -166,3 +168,139 @@ DOM 요소에 Event Handler를 다를 수 있습니다.
 [🔺 Top](#top)
 
 <hr/><br/>
+
+
+
+##### 02
+# 02. 변환(transformation) 연산자
+
+## 02-01. ``map`` 연산자
+
+옵저버블에서 발행된 값을 변환하기 위한 연산자 입니다.
+
+```javascript
+const { from } = require("rxjs");
+const { map } = require("rxjs/operators");
+
+const obs$ = from(1, 2, 3, 4, 5);
+obs$.pipe(
+  map(value => Math.pow(value, 2)),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 02-02. ``pluck`` 연산자
+
+옵저버블에서 발행된 값이 객체일 때, 해당 객체의 특정 Property를 추출할 때 사용합니다.
+
+```javascript
+const { from } = require("rxjs");
+const { pluck, concatMap } = require("rxjs/operators");
+const axios = require("axios");
+
+const obs$ = from(axios.get("http://api.github.com/search/users?q=user:mojombo"));
+obs$.pipe(
+  pluck("data", "items"),
+  concatMap(items => from(items).pipe(
+    pluck("html_url"),
+  )),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 02-03. ``toArray`` 연산자
+
+발행된 값들을 배열로 묶어서 발행 합니다.
+
+```javascript
+const { range } = require("rxjs");
+const { filter, toArray } = require("rxjs/operators");
+
+const obs$ = range(1, 50);
+obs$.pipe(
+  filter(value => value % 3 === 0),
+  filter(value => value % 2 === 1),
+  toArray(),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 02-04. ``scan`` 연산자
+
+``reduce`` 와 유사한 동작으로, 발행된 값들을 누적하는 동작을 합니다.
+
+``reduce``는 누적된 결과만 발행하지만, ``scan``은 각 누적과정의 값을 매번 발행 합니다.
+
+```javascript
+const { of } = require("rxjs");
+const { scan } = require("rxjs/operators");
+
+const obs$ = of(1, 2, 3, 4, 5);
+obs$.pipe(
+  scan((acc, value) => acc + value),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 02-05. ``zip`` 생성기
+
+``zip`` 생성기는 복수의 옵저버블을 묶어서 발행하는 옵저버블을 생성 합니다.
+
+값을 발행할 때, 인자로 넘겨준 각 옵저버블의 발행값들이 하나의 짝을 이룰 때, 해당 값들을 배열로 만들어 발행 합니다.
+
+```javascript
+const { zip, from, of } = require("rxjs");
+
+const obs1$ = from([1, 2, 3, 4, 5]);
+const obs2$ = of("a", "b", "c", "d", "e");
+const obs3$ = from([true, false, "Z", [31, 32, 33], { name: "zip" }])
+
+zip(obs1$, obs2$, obs3$).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
