@@ -304,3 +304,116 @@ zip(obs1$, obs2$, obs3$).subscribe(console.log);
 
 
 
+##### 03
+# 03. ``take`` 와 ``skip`` 관련 연산자
+
+## 03-01. ``take`` 연산자
+
+``take`` 연산자는 발행되는 값의 개수를 지정할 수 있습니다.
+
+지정한 개수가 되면, 옵저버블은 ``complete()`` 을 호출합니다.
+
+```javascript
+const { range } = require("rxjs");
+const { filter, take } = require("rxjs/operators");
+
+const obs$ = range(1, 50);
+obs$.pipe(
+  filter(value => value % 2 === 0),
+  take(5),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 03-02. ``takeLast`` 연산자
+
+``takeLast`` 연산자는 발행된 값들 중, 마지막에서 부터 지정한 개수만큼 발행 합니다.
+
+특징은 옵저버블이 ``complete()`` 되어야 값을 발행 합니다.
+
+```javascript
+const { range } = require("rxjs");
+const { takeLast } = require("rxjs/operators");
+
+const obs$ = range(1, 20);
+obs$.pipe(
+  takeLast(5),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 03-03 ``takeWhile`` 연산자
+
+인자로 넘겨준 callback 이 ``true`` 일 때 값을 발행하며, ``false`` 가 되면 옵저버블을 ``complete()`` 시킵니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { takeWhile } = require("rxjs/operators");
+
+const obs$ = interval(500);
+obs$.pipe(
+  takeWhile(value => value < 10),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 04. ``takeUntil`` 연산자
+
+인자로 옵저버블을 넘겨주며, 넘겨준 옵저버블에서 값이 발행될때 까지만 값을 발행 합니다.
+
+```javascript
+const { interval, from } = require("rxjs");
+const { pluck, concatMap, tap } = require("rxjs/operators");
+const axios = require("axios");
+
+const url = "http://api.github.com/search/users?q=user:mojombo";
+
+const obs$ = interval(50);
+obs$.pipe(
+  takeUntil(from(axios.get(url)).pipe(
+    pluck("data", "items"),
+    concatMap(item => item),
+    pluck("html_url"),
+    tap(console.log),
+  )),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 05. ``skip`` 연산자
