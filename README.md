@@ -9,6 +9,8 @@
 
 * [03. ``take`` 와 ``skip`` 관련 연산자](#03)
 
+* [04. 시간을 다루는 연산자 1](#04)
+
 
 
 <br/><hr/><br/>
@@ -523,3 +525,170 @@ obs$.pipe(
 
 
 
+##### 04
+# 04. 시간을 다루는 연산자 1
+
+## 04-01. ``delay`` 연산자
+
+옵저버블에서 값이 발행된 시점부터, 지정한 시간만큼 지연시킨 후, 값을 발행 합니다.
+
+발행된 값 각각에 대해 지연시킨다는 것이 특징 입니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, delay, tap } = require("rxjs/operators");
+
+const obs$ = interval(1000);
+obs$.pipe(
+  take(5),
+  delay(5001),
+  tap(value => console.log(`지연 후, 발행시작: ${value}`)),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 04-02. ``timestamp`` 연산자
+
+옵저버블에서 값이 발행된 시점의 시간값을 발행된 값에 mapping 하여, 발행합니다.
+
+``timestamp()`` 를 사용하면, 옵저버블에서 발행한 값을 ``value`` Property에 넣고, 발행시간 값을 ``timestamp`` Property 에 넣은 Object 형태로 값을 발행 합니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { timestamp, pluck, map } = require("rxjs/operators");
+
+const obs$ = interval(1000);
+obs$.pipe(
+  timestamp(),
+  pluck("timestamp"),
+  map(time => moment(time)),
+  map(timeMoment => timeMoment.format("YYYY년 MM월 DD일 HH:mm:ss")),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 04-03. ``timeInterval`` 연산자
+
+옵저버블에서 값이 발행된 후 다음 발행까지 걸린 시간을 각 발행값에 mapping 하여 발행 합니다.
+
+옵저버블에서 발행된 값은 ``value`` Property 에 넣고, 걸린 시간값은 ``interval`` Property 에 넣어서, Object로 값을 발행 합니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { timeInterval, pluck, map } = require("rxjs/operators");
+
+const obs$ = interval(1500);
+obs$.pipe(
+  timeInterval(),
+  pluck("interval"),
+  map(milliseconds => milliseconds / 1000),
+).subscribe(seconds => console.log(`경과시간: ${seconds}초`));
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 04-04. ``timeout`` 연산자
+
+인자로 지정한 시간내에, 옵저버블에서 값이 발행되지 않으면, ``throwError()`` 를 호출하는 연산자 입니다.
+
+```javascript
+const { of } = require("rxjs");
+const { timeout, delay } = require("rxjs/operators");
+
+const obs$ = of(1, 2, 3, 4, 5);
+obs$.pipe(
+  delay(3000),
+  timeout(2000),
+).subscribe({
+  next: console.log,
+  error: console.log,
+  complete: () => console.log("complete() 호출"),
+});
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 04-05 ``timeoutWith`` 연산자 (deprecated)
+
+``timeout`` 과 동일한 동작을 하지만, 지정한 시간을 초과하게 될 경우, 두번째 인자로 넘겨준 ``옵저버블을 구독``하게 합니다.
+
+```javascript
+const { of, interval } = require("rxjs");
+const { timeoutWith, delay, scan, map } = require("rxjs/operators");
+
+const obs$ = of(10, 20, 30, 40, 50);
+obs$.pipe(
+  delay(3000),
+  timeoutWith(2000, () => interval(1000).pipe(
+    scan(acc => ++acc, 1000),
+    map(value => console.log(`timeout됨: ${value}`)),
+  )),
+).subscribe(console.log);
+```
+
+<br/>
+
+``timeoutWith`` 는 ``v8`` 부터 삭제될 함수이기 때문에, ``timeout`` 으로 사용하는 것을 권장 합니다.
+
+``timeout`` 에 넘겨주는 인자를 객체형식으로 넘겨주면, ``timeoutWith``와 동일한 동작을 하게 됩니다.
+
+``timeout`` 에 인자로 넘겨주는 객체는 ``TimeoutConfig`` 타입이며, 다음과 같은 Property 를 가집니다.
+
+* ``each``: timeout 값
+* ``with``: timeout 될 경우, 새로 구독할 옵저버블을 반활하는 callback 함수
+
+```javascript
+const { of, interval } = require("rxjs");
+const { timeout, delay, scan, map } = require("rxjs/operators");
+
+const obs$ = of(10, 20, 30, 40, 50);
+obs$.pipe(
+  delay(3000),
+  timeout({ each: 2000, with: () => interval(1000).pipe(
+    scan(acc => ++acc, 1000),
+    map(value => `timeout 됨: ${value}`),
+  )}),
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
