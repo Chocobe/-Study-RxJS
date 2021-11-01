@@ -31,10 +31,10 @@
 
       const init = () => {
         fromEvent($myInput, "input").pipe(
-          timeInterval(),
           sampleTime(1000),
+          timeInterval(),
           map(({ value, interval }) => `[시간간격: ${interval}] - 값: ${value.target.value}`),
-        ).subscribe(console.log);
+        ).subscribe(value => $result.innerHTML = value);
       };
 
       init();

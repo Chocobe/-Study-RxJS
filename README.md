@@ -11,6 +11,8 @@
 
 * [04. 시간을 다루는 연산자 1](#04)
 
+* [05. 시간을 다루는 연산자 2](#05)
+
 
 
 <br/><hr/><br/>
@@ -683,6 +685,288 @@ obs$.pipe(
     map(value => `timeout 됨: ${value}`),
   )}),
 ).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 05
+# 05. 시간을 다루는 연산자 2
+
+## 05-01. ``debounceTime`` 연산자
+
+옵저버블에서 값을 발행하는 간격이, ``debounceTime`` 에 지정한 시간보다 길어야 값을 발행 합니다.
+
+즉, 지정한 시간보다 짧은 간격으로 값이 발행되면, ``debounceTime``은 값을 발행하지 않고 대기합니다.
+
+``debounceTime`` 에 만족할 경우, 마지막으로 발행된 값을 발행 합니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>debounceTime 연산자</title>
+
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  </head>
+  
+  <body>
+    <h1>debounceTime 연산자</h1>
+
+    <div>
+      <div>마지막 입력 후 1초가 지나면, 화면에 적용 됩니다.</div>
+      <label for="myInput">입력</label>
+      <input type="text" id="myInput">
+
+      <h3>결과: <span class="result" /></h3>
+    </div>
+
+    <script>
+      const { fromEvent } = rxjs;
+      const { debounceTime, tap, pluck } = rxjs.operators;
+
+      const $myInput = document.querySelector("#myInput");
+      const $result = document.querySelector(".result");
+
+      const init = () => {
+        fromEvent($myInput, "input").pipe(
+          debounceTime(1000),
+          tap(console.log),
+          pluck("target", "value"),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      init();
+    </script>
+  </body>
+</html>
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 05-02. ``auditTime`` 연산자
+
+옵저버블에서 첫번째 값이 발행되면, ``auditTime`` 에 지정한 시간 이후, 최신값을 발행 합니다.
+
+그리고, 옵저버블에 ``complete()`` 가 호출되면, 마지막 대기중인 값은 발행하지 않습니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>auditTime 연산자</title>
+
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  </head>
+
+  <body>
+    <h1>auditTime 연산자</h1>
+
+    <div>
+      <div>첫 입력으로 부터 1초 후, 값을 발행 합니다. (그 사이 최신값)</div>
+      <label for="myInput">입력</label>
+      <input type="text" id="myInput">
+
+      <h3>결과: <span class="result" /></h3>
+    </div>
+
+    <script>
+      const { fromEvent } = rxjs;
+      const { auditTime, pluck } = rxjs.operators;
+
+      const $myInput = document.querySelector("#myInput");
+      const $result = document.querySelector(".result");
+
+      const init = () => {
+        fromEvent($myInput, "input").pipe(
+          auditTime(1000),
+          pluck("target", "value"),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      init();
+    </script>
+  </body>
+</html>
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 05-03. ``sampleTime`` 연산자
+
+지정한 시간 간격마다 값을 발행 합니다.
+
+다만, 옵저버블에서 발행한 값이 없으면, 발행하지 않습니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>sampleTime 연산자</title>
+
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  </head>
+
+  <body>
+    <h1>sampleTime 연산자</h1>
+
+    <div>
+      <div>지정한 시간마다 값을 발행합니다. (지정한 시간내에 발행값이 없으면, 값을 발행하지 않습니다.)</div>
+
+      <label for="myInput">입력</label>
+      <input type="text" id="myInput">
+
+      <h3>결과: <span class="result" /></h3>
+    </div>
+
+    <script>
+      const { fromEvent } = rxjs;
+      const { sampleTime, timeInterval, tap } = rxjs.operators;
+
+      const $myInput = document.querySelector("#myInput");
+      const $result = document.querySelector(".result");
+
+      const init = () => {
+        fromEvent($myInput, "input").pipe(
+          sampleTime(1000),
+          timeInterval(),
+          tap(({ value, interval }) => `[시간간격: ${interval}] - 값: ${value.target.value}`),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      init();
+    </script>
+  </body>
+</html>
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 05-04 ``throttleTime`` 연산자
+
+첫번째 값을 발행하고 지정한 시간만큼 대기하거나, 지정한 시간만큼 대기한 후 마지막 값을 발행 할 수 있습니다.
+
+3번째 인지아니 ``throttleConfig`` 객체를 사용하여, 동작을 설정 할 수 있습니다.
+
+(2번째 인자는 스케줄러로, 기본값인 ``asyncScheduler`` 를 사용)
+
+```typescript
+interface throttleConfig {
+  // leading: true 일 경우, 첫번째 값을 발행 (기본값: true)
+  leading: boolean,
+  // trailing: true 일 경우, 마지막 값을 발행 (기본값: false)
+  trailing: boolean,
+
+  // 둘 다 true 로 사용 가능
+}
+```
+
+<br/>
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>throttleTime 연산자</title>
+
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  </head>
+  
+  <body>
+    <h1>throttleTime 연산자</h1>
+
+    <div>
+      <div>lead: true 설정 시, 첫번째 값을 발행하고, 지정한 시간동안 값을 발행하지 않습니다.</div>
+
+      <label for="myInput">입력: </label>
+      <input type="text" id="myInput">
+
+      <h3>결과: <span class="result" /></h3>
+    </div>
+
+    <script>
+      const { fromEvent, asyncScheduler } = rxjs;
+      const { throttleTime, pluck } = rxjs.operators;
+
+      const $myInput = document.querySelector("#myInput");
+      const $result = document.querySelector(".result");
+
+      const throttleForFirst = () => {
+        fromEvent($myInput, "input").pipe(
+          throttleTime(1000, asyncScheduler, { leading: true, trailing: false }),
+          pluck("target", "value"),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      // throttleForFirst()
+
+      const throttleForLast = () => {
+        fromEvent($myInput, "input").pipe(
+          throttle(1000, asyncScheduler, { leading: false, trailing: true }),
+          pluck("target", "value"),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      // throttleForLast()
+
+      const throttleForBoth = () => {
+        fromEvent($myInput, "input").pipe(
+          throttle(1000, asyncScheduler, { leading: true, trailing: true }),
+          pluck("target", "value"),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      // throttleForBoth();
+    </script>
+  </body>
+</html>
 ```
 
 
