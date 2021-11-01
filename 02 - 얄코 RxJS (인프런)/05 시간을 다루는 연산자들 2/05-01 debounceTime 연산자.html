@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>debounceTime 연산자</title>
+
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  </head>
+  
+  <body>
+    <h1>debounceTime 연산자</h1>
+
+    <div>
+      <div>마지막 입력 후 1초가 지나면, 화면에 적용 됩니다.</div>
+      <label for="myInput">입력</label>
+      <input type="text" id="myInput">
+
+      <h3>결과: <span class="result" /></h3>
+    </div>
+
+    <script>
+      const { fromEvent } = rxjs;
+      const { debounceTime, pluck, tap } = rxjs.operators;
+
+      const init = () => {
+        const $myInput = document.querySelector("#myInput");
+        const $result = document.querySelector(".result");
+
+        fromEvent($myInput, "input").pipe(
+          debounceTime(1000),
+          tap(console.log),
+          pluck("target", "value"),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      init();
+    </script>
+  </body>
+</html>
