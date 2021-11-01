@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>auditTime 연산자</title>
+
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  </head>
+
+  <body>
+    <h1>auditTime 연산자</h1>
+
+    <div>
+      <div>첫 입력으로 부터 1초 후, 값을 발행 합니다. (그 사이 최신값)</div>
+      <label for="myInput">입력</label>
+      <input type="text" id="myInput">
+
+      <h3>결과: <span class="result" /></h3>
+    </div>
+
+    <script>
+      const { fromEvent } = rxjs;
+      const { auditTime, pluck } = rxjs.operators;
+
+      const $myInput = document.querySelector("#myInput");
+      const $result = document.querySelector(".result");
+
+      const init = () => {
+        fromEvent($myInput, "input").pipe(
+          auditTime(1000),
+          pluck("target", "value"),
+        ).subscribe(value => $result.innerHTML = value);
+      };
+
+      init();
+    </script>
+  </body>
+</html>
