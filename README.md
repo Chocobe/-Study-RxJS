@@ -17,6 +17,8 @@
 
 * [07. 기타 유용한 연산자들 1](#07)
 
+* [08. 기타 유용한 연산자들 2](#08)
+
 
 
 <br/><hr/><br/>
@@ -1432,3 +1434,271 @@ obs$.subscribe(console.log);
 [🔺 Top](#top)
 
 <hr/><br/>
+
+
+
+# 08. 기타 유용한 연산자들 2
+
+## 08-01. ``startWith`` 와 ``endWith`` 연산자
+
+``startWith`` 연산자는 첫 발행값을 지정하는 연산자 입니다.
+
+복수의 값을 지정할 수 있으며, 순서대로 발행한 후, ``Observable`` 에서 실제로 발행한 값을 발행합니다.
+
+```javascript
+const { from } = require("rxjs");
+const { startWith, endWith } = require("rxjs/operators");
+
+const obs$ = from([1, 2, 3]).pipe(
+  startWith(-2, -1, 0),
+  endWith(4, 5, 6),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 08-02. ``every`` 연산자
+
+``Observable`` 에서 발행된 모든 값에 대해, ``every`` 의 callback 조건에 맞는지 여부를 발행하는 연산자 입니다.
+
+```javascript
+const { from } = require("rxjs");
+const { every } = require("rxjs/operators");
+
+const obs$ = from([1, 3, 5, 7, 9]).pipe(
+  every(value => value % 2 === 1),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 08-03. ``defaultIfEmpty`` 연산자
+
+``Observable`` 이 ``complete()`` 될 때까지 발행한 값이 없을 경우, 특정 값을 발행시켜주는 연산자 입니다.
+
+```javascript
+const { interval, timer } = require("rxjs");
+const { takeUntil, defaultIfEmpty } = require("rxjs/operators");
+
+const obs$ = interval(3000).pipe(
+  takeUntil(timer(2000)),
+  defaultInfEmpty("NO Value"),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 08-04. ``retry`` 연산자
+
+``Observable`` 을 구독한 상태에서, ``Error`` 가 발행할 경우, 지정한 횟수만큼 재시도하는 연산자 입니다.
+
+```javascript
+const { interval, throwError, of } = require("rxjs");
+const { retry, concatMap } = require("rxjs/operators");
+
+const myError$ = throwError(() => new Error("테스트용 에러"));
+
+const obs$ = interval(500).pipe(
+  concatMap(value => {
+    const ran = Math.floor(Math.random() * 10);
+
+    if(ran < 1) return myError$;
+
+    return of(value);
+  }),
+
+  retry(3),
+);
+
+obs$.subscribe({
+  next: console.log,
+  error: error => console.log(`에러발생: ${error.message}`),
+});
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+# 08-05. ``defer`` 생성자
+
+``interval``, ``timer`` 등의 생성자는 해당 Javascript 파일을 읽는 시점에 생성자 callback을 실행 합니다.
+
+반면, ``defer`` 는 ``구독 시점`` 에 callback 을 실행하기 때문에, 동적으로 발행값을 만들 수 있습니다.
+
+```javascript
+const { interval, defer, of } = require("rxjs");
+
+const obs$ = interval(500);
+
+obs$.subscribe(value => {
+  const isOdd$ = value % 2 === 0
+    ? defer(() => of("짝수"))
+    : defer(() => of("홀수"));
+
+  isOdd$.subscribe(console.log);
+});
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 08-06. ``iif`` 연산자
+
+``defer`` 생성자 처럼, 동적으로 발행값을 지정할 수 있습니다.
+
+차이점은 전달인자가 다릅니다.
+
+* 첫번째 인자: ``() => boolean``
+* 두번째 인자: 첫번째 인자의 반환값이 ``true`` 일 때, 생성할 ``Observable``
+* 세번째 인자: 첫번째 인자의 반환값이 ``false`` 일 때, 생성할 ``Observable``
+
+```javascript
+const { interval, iif, of } = require("rxjs");
+
+const obs$ = interval(500);
+
+obs$.subscribe(value => {
+  iif(
+    () => value % 2 === 0,
+    of("짝수"),
+    of("홀수"),
+  ).subscribe(console.log);
+});
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 08-07. ``empty`` 연산자
+
+발행값이 없는 빈 ``Observable`` 생성자 입니다.
+
+``deprecated`` 된 생성자 이며, ``EMPTY`` 로 사용하길 권장 합니다.
+
+```javascript
+const { EMPTY } = require("rxjs");
+
+const obs$ = EMPTY;
+
+obs$.subscribe({
+  next: console.log,
+  error: console.log,
+  complete: () => console.log(`완료 !!`),
+});
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 08-08. ``throwError`` 생성자
+
+구독하는 즉시, ``error()`` 를 호출하는 생성자 입니다.
+
+```javascript
+const { throwError } = require("rxjs");
+
+const obs$ = throwError(() => new Error("테스트용 에러 발생"));
+
+obs$.subscribe({
+  next: console.log,
+  error: error => console.log(`ERROR] ${error.message}`),
+  complete: console.log,
+});
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 08-09. ``share`` 연산자
+
+``interval``, ``of``, ``from`` 등, ``Cold Observable`` 을 ``Hot Observable`` 로 변환시켜 주는 연산자 입니다.
+
+``Cold Observable`` 은 구독하는 시점마다, 각각의 구독은 ``Observable`` 의 처음 발행값부터 받게 됩니다.
+
+``Hot Observable`` 은 하나의 스트림에서 복수의 ``Observer`` 에 동일한 값을 발행합니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, tap, share } = require("rxjs/operators");
+
+const obs$ = interval(500).pipe(
+  take(20),
+  tap(value => console.log(`Side Effect: ${value}`)),
+  share(),
+);
+
+obs$.subscribe(value => console.log(`* 옵저버 1: ${value}`));
+
+setTimeout(() => {
+  obs$.subscribe(value => console.log(`** 옵저버 2: ${value}`));
+}, 2000);
+
+setTimeout(() => {
+  obs$.subscribe(value => console.log(`*** 옵저버 3: ${value}`));
+}, 4000);
+```
