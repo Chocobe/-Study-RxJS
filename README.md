@@ -13,6 +13,8 @@
 
 * [05. 시간을 다루는 연산자 2](#05)
 
+* [06. 스트림을 결합하는 생성자 및 연산자](#06)
+
 
 
 <br/><hr/><br/>
@@ -967,6 +969,245 @@ interface throttleConfig {
     </script>
   </body>
 </html>
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 06
+# 06. 스트림을 결합하는 생성자 및 연산자
+
+## 06-01. ``merge`` 생성자
+
+인자로 복수의 ``Observable`` 을 전달하고, 전달받은 모든 ``Observable`` 을 하나로 합쳐진 ``Observable`` 을 생성 합니다.
+
+인자의 마지막에 ``Number`` 를 입력하게 되면, 한번에 병합할 개수를 지정하게 됩니다.
+
+병합개수를 지정하게 되면, 기존의 ``Observable`` 이 ``complete()`` 되어야, 다음 ``Observable`` 이 병합됩니다.
+
+```javascript
+const { interval, merge } = require("rxjs");
+const { take, map } = require("rxjs/operators");
+
+const obs1$ = interval(1000).pipe(
+  take(5),
+  map(() => "* interval 1"),
+);
+
+const obs2$ = interval(1000).pipe(
+  take(5),
+  map(() => "** interval 2"),
+);
+
+const obs3$ = interval(1000).pipe(
+  take(5),
+  map(() => "*** interval 3"),
+);
+
+const obs4$ = interval(1000).pipe(
+  take(5),
+  map(() => "**** interval 4"),
+);
+
+const obs5$ = interval(1000).pipe(
+  take(5),
+  map(() => "***** interval 5"),
+);
+
+merge(
+  obs1$,
+  obs2$,
+  obs3$,
+  obs4$,
+  obs5$,
+  3
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 06-02. ``concat`` 생성자
+
+``concat`` 생성자는 ``merge`` 생성자에 병합개수를 ``1개``로 지정한 것과 같은 동작을 합니다.
+
+즉, 현재 ``Observable`` 이 ``complete()`` 되어야, 다음 ``Observable`` 을 구독하는 방식 입니다.
+
+```javascript
+const { interval, concat } = require("rxjs");
+const { take, map } = require("rxjs/operators");
+
+const obs1 = interval(1000).pipe(
+  take(5),
+  map(() => "* interval 1"),
+);
+
+const obs2 = interval(1000).pipe(
+  take(5),
+  map(() => "* interval 2"),
+);
+
+const obs3 = interval(1000).pipe(
+  take(5),
+  map(() => "* interval 3"),
+);
+
+const obs4 = interval(1000).pipe(
+  take(5),
+  map(() => "* interval 4"),
+);
+
+const obs5 = interval(1000).pipe(
+  take(5),
+  map(() => "* interval 5"),
+);
+
+concat(
+  obs1$,
+  obs2$,
+  obs3$,
+  obs4$,
+  obs5$,
+).subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 06-03. ``mergeAll`` 연산자
+
+``Observable`` 의 ``pipe`` 내에서 ``Observable`` 객체를 발행하는 경우, 모든 ``Observable``을 병합하여, 하나의 ``Observable``로 만들고 구독하게 됩니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, map, mergeAll } = require("rxjs/operators");
+
+const obs$ = interval(1000).pipe(
+  take(3),
+  map(i => interval(Math.floor(Math.random() * 1000)).pipe(
+    take(3),
+    map(j => `[${i}-${j}]`),
+  )),
+  mergeAll(),
+)
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 06-04. ``mergeMap`` 연산자
+
+``map()`` 연산자와 ``mergeAll()`` 연산자를 혼합한 형식의 연산자 입니다.
+
+``mergeMap`` 에서 반환하는 ``Observable``들을 하나의 ``Observable``로 병합하여 구독하게 해줍니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, mergeMap, map } = require("rxjs/operators");
+
+const obs$ = interval(1000).pipe(
+  take(3),
+  mergeMap(i => interval(Math.floor(Math.random() * 1000)).pipe(
+    take(3),
+    map(j => `[${i}-${j}]`),
+  )),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 06-05. ``concatMap`` 연산자
+
+``concatMap()`` 연산자에서 반환하는 ``Observable`` 들을 순서대로 구독 합니다.
+
+현재 구독중인 ``Observable`` 이 ``complete()`` 되어야, 다음 ``Observable`` 을 구독합니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, concatMap, map } = require("rxjs/operators");
+
+const obs$ = interval(1000).pipe(
+  take(3),
+  concatMap(i => interval(Math.floor(Math.random() * 1000)).pipe(
+    take(3),
+    map(j => `[${i}-${j}]`),
+  )),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 06-06. ``switchMap`` 연산자
+
+``switchMap`` 에서 반환하는 ``Observable`` 들을 순서대로 구독 합니다.
+
+특징은, 현재 구독중인 ``Observable`` 에서 값을 발행 하다가, 다음 ``Observable`` 에서 값을 발행하게 되면, 현재 구독중인 ``Observable`` 을 구독해제 하고, 다음 ``Observable`` 의 값을 발행하게 됩니다.
+
+결과적으로, 최신 ``Observable``의 값만 발행하는 형식 입니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, switchMap, map } = require("rxjs/operators");
+
+const obs$ = interval(1000).pipe(
+  take(3),
+  switchMap(i => interval(Math.floor(Math.random() * 1000)).pipe(
+    take(3),
+    map(j => `[${i}-${j}]`),
+  )),
+);
+
+obs$.subscribe(console.log);
 ```
 
 
