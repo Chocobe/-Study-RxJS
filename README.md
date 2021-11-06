@@ -15,6 +15,8 @@
 
 * [06. 스트림을 결합하는 생성자 및 연산자](#06)
 
+* [07. 기타 유용한 연산자들 1](#07)
+
 
 
 <br/><hr/><br/>
@@ -1204,6 +1206,219 @@ const obs$ = interval(1000).pipe(
   switchMap(i => interval(Math.floor(Math.random() * 1000)).pipe(
     take(3),
     map(j => `[${i}-${j}]`),
+  )),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+##### 07
+# 07. 기타 유용한 연산자들 1
+
+## 07-01. ``sequenceEqual`` 연산자
+
+발행되는 값이 ``sequenceEqual``의 인자로 넘겨준 ``Observable`` 에서 발행하는 값과 순서가 같을 경우, ``true`` 를 발행하는 연산자 입니다.
+
+객체 또는 배열의 모든 값과 순서의 일치여부를 파악할 때, 유용합니다.
+
+```javascript
+const { from } = require("rxjs");
+const { sequenceEqual } = require("rxjs/operators");
+
+const source$ = from([0, 1, 2, 3]);
+
+const obs$ = from([0, 1, 2, 3]).pipe(
+  sequenceEqual(source$),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 07-02. ``distinctUntilChanged`` 연산자
+
+연속된 중복값을 걸러주는 연산자 입니다.
+
+중복된 값이 연속되지 않는 경우에는, 걸러지지 않는 특징을 가집니다.
+
+```javascript
+const { from } = require("rxjs");
+const { distinctUntilChanged } = require("rxjs/operators");
+
+const data = [
+  { name: "Kim", sex: "male" },
+  { name: "Park", sex: "female" },
+  { name: "Lee", sex: "female" },
+  { name: "Bob", sex: "male" },
+  { name: "John", sex: "male" },
+];
+
+const obs$ = from(data).pipe(
+  distinctUntilChanged((lhs, rhs) => lhs.sex === rhs.sex),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 07-03. ``combineLatest`` 생성자
+
+복수의 ``Observable`` 에서 발행된 값들에서, 각각 최신값을 배열로 묶은 형식으로 발행 하는 생성자 입니다.
+
+``zip`` 생성자는 발생된 Index 번호에 맞게 짝을 지었다면, ``combineLatest`` 생성자는 최신값으로 묶는 특징을 가집니다.
+
+```javascript
+const { combineLatest, from, of } = require("rxjs");
+const { mergeMap, delay } = require("rxjs/operators");
+
+const obs$ = combineLatest([
+  from([1000, 2000, 3000]).pipe(
+    mergeMap(value => of(value).pipe(
+      delay(value),
+    )),
+  ),
+  from(["A", "B"]).pipe(
+    mergeMap(value => of(value).pipe(
+      delay(1500),
+    )),
+  ),
+]);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 07-04 ``buffer`` 연산자
+
+인자로 넘겨준 ``Observable``에서 값이 발행되면, 지금까지 발행된 소스 값을 배열에 묶어서 한번에 발행 합니다.
+
+즉, 발행 시점을 인자로 넘겨준 ``Observable``에 의해 결정되고, 그 사이 값들을 모아서 한번에 발행하는 형식 입니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, buffer } = require("rxjs/operators");
+
+const obs$ = interval(1000).pipe(
+  take(5),
+  buffer(interval(1500)),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 07-05. ``bufferCount`` 연산자
+
+값을 묶어서 발행하는 동작은 ``buffer`` 와 동일 합니다.
+
+차이점은 값을 발행하는 시점이 ``buffer`` 에 쌓인 데이터 개수가 충족될 때 입니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, bufferCount } = require("rxjs/operators");
+
+const obs$ = interval(200).pipe(
+  take(50),
+  bufferCount(5),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 07-06. ``bufferTime`` 연산자
+
+buffer 에 쌓인 데이터를 발행하는 시점이, 시간값인 연산자 입니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, bufferTime } = require("rxjs/operators");
+
+const obs$ = interval(200).pipe(
+  take(50),
+  bufferTime(1000),
+);
+
+obs$.subscribe(console.log);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+## 07-07. ``groupBy`` 연산자
+
+인자로 넘겨준 callback 에서 반환하는 값을 기준으로 개별 ``Observable`` 을 발행 합니다.
+
+```javascript
+const { interval } = require("rxjs");
+const { take, groupBy, mergeMap, toArray } = require("rxjs/operators");
+
+const obs$ = interval(100).pipe(
+  take(50),
+  groupBy(value => value % 3),
+  mergeMap(group$ => group$.pipe(
+    toArray(),
   )),
 );
 
