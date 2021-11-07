@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="./Search.css">
+
+    <title>스마트한 키워드 검색창 만들기</title>
+
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body>
+    <div class="smartSearch">
+      <h1>RxJS를 사용한 검색기능 구현</h1>
+
+      <div class="searchWrapper">
+        <input type="text" id="searchInput" class="searchInput" autofocus>
+
+        <div class="result" />
+      </div>
+    </div>
+
+    <script src="./Search.js"></script>
+  </body>
+</html>

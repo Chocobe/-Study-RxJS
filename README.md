@@ -19,6 +19,8 @@
 
 * [08. 기타 유용한 연산자들 2](#08)
 
+* [09. 스마트한 키워드 검색창 만들기](#09)
+
 
 
 <br/><hr/><br/>
@@ -1701,4 +1703,80 @@ setTimeout(() => {
 setTimeout(() => {
   obs$.subscribe(value => console.log(`*** 옵저버 3: ${value}`));
 }, 4000);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 09
+# 09. 스마트한 키워드 검색창 만들기
+
+## 09-01. ``Error`` 발생 시, 해당 ``Observable`` 계속 유지하기
+
+``Observable`` 에서 ``Error` 발생 시, ``error()`` 를 호출하게 됩니다.
+
+그리고 해당 ``Observable`` 은 ``complete()`` 가 되어, 더이상 사용할 수 없습니다.
+
+만약, ``Error`` 가 발생하더라도, 해당 ``Observable`` 을 계속 사용해야 할 경우는 다음과 같이 처리할 수 있습니다.
+
+* ``Error`` 가 발생할 수 있는 부분을, 새로운 ``Observable`` 로 생성
+* 새로 만든 ``Observable`` 을 ``mergeMap(또는 concatMap, switchMap)`` 으로 병합
+* 새로 만든 ``Observable`` 에서 ``onErrorResumeNext(EMPTY)`` 로 처리
+  * (``Error`` 가 발생한 ``Observable`` 을 ``EMPTY`` 로 처리하여, 원래 ``Observable`` 의 ``error()`` 가 호출되지 않도록 처리)
+
+
+(``catchError`` 를 사용해도 동일한 동작을 합니다)
+
+<br/>
+
+아래 코드는 에러처리 예시 코드 입니다.
+
+```javascript
+const { fromEvent, from, EMPTY } = require("rxjs");
+const { 
+  pluck,
+  filter,
+  debounceTime,
+  map,
+  switchMap,
+  catchError,
+  onErrorResumeNext,
+  scan
+} = require("rxjs/operators");
+const axios = require("axios");
+
+const $searchInput = document.querySelector(".searchInput");const $result = document.querySelector(".result");
+const url = "http://localhost: 300/people/quarter-error";
+
+(function init() {
+  fromEvent($searchInput, "keyup").pipe(
+    filter(e => e.code !== "Backspace"),
+    filter(e => e.code !== "Delete"),
+    pluck("target", "value"),
+    filter(value => value.length > 1),
+    debounceTime(500),
+    map(value => ({ name: value })),
+    // 새로운 Observable을 생성하여, 서버 요청
+    switchMap(params => from(axios.get(url, { params })).pipe(
+      // 에러 발생 시, EMPTY Observable 로 처리 (상위 Observable에 Error가 전달되지 않음)
+      onErrorResumeNext(EMPTY),
+    )),
+    pluck("data"),
+  ).subscribe(showResult);
+})();
+
+function showResult(data) {
+  from(data).pipe(
+    map(person => `${person.first_name} ${person.last_name}`),
+    map(name => `<div>${name}</div>`),
+    scan((acc, name) => acc + name, ''),
+  ).subscribe(people => $result.innerHTML = people);
+}
 ```
