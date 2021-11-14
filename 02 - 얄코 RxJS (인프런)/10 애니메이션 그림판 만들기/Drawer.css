@@ -1,0 +1,16 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#myCanvas {
+  width: 600px;
+  height: 360px;
+  background-color: #eee;
+}
+
+.options {
+  padding-left: 20px;
+  margin-top: 20px;
+}

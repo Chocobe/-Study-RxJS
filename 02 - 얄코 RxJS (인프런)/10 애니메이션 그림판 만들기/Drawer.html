@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>애니메이션 그림판 만들기</title>
+    
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="./Drawer.css">
+  </head>
+  
+  <body>
+    <canvas id="myCanvas" width="600" height="360"></canvas>
+
+    <div class="options">
+      <input type="radio" name="mapType" id="mergeMap" value="mergeMap">
+      <label for="mergeMap">mergeMap</label>
+      |
+      <input type="radio" name="mapType" id="concatMap" value="concatMap">
+      <label for="concatMap">concatMap</label>
+      |
+      <input type="radio" name="mapType" id="switchMap" value="switchMap">
+      <label for="switchMap">switchMap</label>
+    </div>
+
+    <script src="./Drawer.js"></script>
+  </body>
+</html>
